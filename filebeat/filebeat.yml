@@ -1,0 +1,65 @@
+# ════════════════════════════════════════════════════════════════════════════
+# Filebeat 7.17.x — ship login-api + ssh-log-parser JSON events to Elasticsearch
+# ════════════════════════════════════════════════════════════════════════════
+
+filebeat.inputs:
+
+  # ─── Login API (web auth attempts) ───────────────────────────────────────
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/attempts.log
+    json.keys_under_root: true
+    json.overwrite_keys: true
+    json.add_error_key: true
+    fields:
+      log_source: web
+    fields_under_root: true
+    tags: ["login-api", "web"]
+
+  # ─── SSH log parser (auth.log structuré) ─────────────────────────────────
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/ssh_attempts.log
+    json.keys_under_root: true
+    json.overwrite_keys: true
+    json.add_error_key: true
+    fields:
+      log_source: ssh
+    fields_under_root: true
+    tags: ["ssh", "auth"]
+
+# ─── Processors (enrichissement) ───────────────────────────────────────────
+processors:
+  - add_host_metadata: ~
+  - add_docker_metadata: ~
+  - drop_fields:
+      fields: ["agent", "ecs", "input", "log.offset", "log.flags"]
+      ignore_missing: true
+
+# ─── Output Elasticsearch (2 indices distincts) ────────────────────────────
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  indices:
+    - index: "if27-web-%{+yyyy.MM.dd}"
+      when.equals:
+        log_source: "web"
+    - index: "if27-ssh-%{+yyyy.MM.dd}"
+      when.equals:
+        log_source: "ssh"
+
+# ─── Index template ────────────────────────────────────────────────────────
+setup.template.name: "if27"
+setup.template.pattern: "if27-*"
+setup.template.overwrite: true
+setup.ilm.enabled: false
+
+# ─── Kibana (pour `filebeat setup` qui charge les dashboards) ──────────────
+setup.kibana:
+  host: "kibana:5601"
+
+# ─── Logging Filebeat (utile pour debug) ───────────────────────────────────
+logging.level: info
+logging.to_files: false
+

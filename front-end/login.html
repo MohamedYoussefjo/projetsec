@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> Login Page IF27 </title>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+
+<body>
+
+<form id="loginForm">
+    <input type="text" name="username" placeholder="Username" style="width:100%;padding:12px;margin-top:10px;">
+
+    <input type="password" name="password" placeholder="Password" style="width:100%;padding:12px;margin-top:10px;">
+
+    <div class="g-recaptcha"
+         data-sitekey="6Ld0aPwsAAAAAEHsFPzolGiecXHEYulyW3HNKZuT"
+         style="margin-top:15px;">
+    </div>
+
+    <button style="width:100%;padding:12px;margin-top:20px;">
+        Login
+    </button>
+</form>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const response = await fetch("/api/login", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === "mfa_required") {
+        window.location.href = data.redirect;
+    } else {
+        alert(data.message);
+    }
+});
+</script>
+
+</body>
+</html>

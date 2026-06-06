@@ -1,0 +1,11 @@
+filebeat/data/registry/
+filebeat/data/meta.json
+filebeat/data/filebeat.lock
+logs/bans.log
+logs/*.log
+logs/ssh/*.log
+logs/ssh/syslog
+__pycache__/
+*.pyc
+.DS_Store
+hydra.restore

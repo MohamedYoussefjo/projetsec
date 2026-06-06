@@ -1,0 +1,30 @@
+Port 2222
+
+PermitRootLogin no
+AllowUsers admin testuser
+
+# Auth méthodes
+PasswordAuthentication yes
+PubkeyAuthentication no
+
+UsePAM no
+KbdInteractiveAuthentication no
+ChallengeResponseAuthentication no
+
+AuthenticationMethods password
+
+AuthorizedKeysFile .ssh/authorized_keys
+
+# Durcissement minimal — laisse passer un peu pour permettre le brute-force
+MaxAuthTries 3
+LoginGraceTime 20
+MaxStartups 3:50:10
+
+X11Forwarding no
+AllowTcpForwarding no
+PermitTunnel no
+PermitEmptyPasswords no
+
+Subsystem sftp internal-sftp
+
+LogLevel VERBOSE

@@ -1,0 +1,108 @@
+services:
+
+  # ─── Web ────────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./front-end:/usr/share/nginx/html
+    cap_add:
+      - NET_ADMIN          # required so detector can iptables-ban inside nginx
+    depends_on:
+      - login-api
+
+  login-api:
+    build: ./login-api
+    container_name: login-api
+    expose:
+      - "5000"
+    volumes:
+      - ./logs:/app/logs
+
+  # ─── SSH (hardened with iptables rate-limit + Spamhaus threat intel) ────
+  ssh:
+    build: ./ssh
+    container_name: ssh
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./logs/ssh:/var/log/
+    cap_add:
+      - NET_ADMIN          # iptables inside the container
+
+  ssh_log_parser:
+    build: ./ssh-log-parser
+    container_name: ssh-log-parser
+    volumes:
+      - ./logs:/app/logs
+      - ./logs/ssh:/sshlogs
+    depends_on:
+      - ssh
+
+  # ─── Active mitigation: read ES → ban via Docker socket ─────────────────
+  detector:
+    build: ./detector
+    container_name: ifsecurity-detector
+    environment:
+      ES_URL: http://elasticsearch:9200
+      INDEX_PATTERN: "if27-*"
+      POLL_INTERVAL_S: "10"
+      LOOKBACK_S: "120"
+      UNBAN_AFTER_S: "3600"
+      BAN_TARGETS: "ssh,nginx"
+    volumes:
+      - ./logs:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - elasticsearch
+      - ssh
+      - nginx
+
+  # ─── Observability ──────────────────────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.22
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.22
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.22
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./logs:/app/logs
+      - ./filebeat/data:/usr/share/filebeat/data
+    depends_on:
+      - elasticsearch
+
+  # ─── Honeypot / tarpit (OPTIONAL) ───────────────────────────────────────
+  # Listens on real port 22 and feeds attackers a 1-byte/sec SSH banner.
+  # Wastes their time, generates demo metrics. Enable with --profile honeypot:
+  #   docker compose --profile honeypot up -d
+  endlessh:
+    image: ghcr.io/skeeto/endlessh:latest
+    container_name: endlessh
+    profiles: ["honeypot"]
+    ports:
+      - "22:2222"
+    restart: unless-stopped
+
+volumes:
+  elastic_data:

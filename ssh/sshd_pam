@@ -1,0 +1,16 @@
+# PAM stack pour SSH (modes B et C)
+# ┌─────────────────────────────────────────────────────────────────┐
+# │ pam_faillock — verrouille le compte après 5 échecs (30 min)     │
+# │ pam_unix     — auth mot de passe Unix (utilisé en mode B)        │
+# │ pam_google_authenticator — TOTP (modes B et C)                  │
+# └─────────────────────────────────────────────────────────────────┘
+
+auth        required      pam_faillock.so preauth silent deny=5 unlock_time=1800
+auth        [success=1 default=ignore] pam_unix.so nullok
+auth        [default=die] pam_faillock.so authfail deny=5 unlock_time=1800
+auth        required      pam_google_authenticator.so
+
+account     required      pam_faillock.so
+account     required      pam_permit.so
+
+session     required      pam_permit.so

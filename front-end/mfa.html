@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IfSecurity MFA</title>
+</head>
+<body style="background:#0f172a;color:white;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh;">
+
+<div style="background:#1e293b;padding:40px;border-radius:12px;width:360px;">
+    <h2>MFA Verification</h2>
+
+    <form id="mfaForm">
+        <input type="text" name="code" placeholder="Enter MFA code" style="width:100%;padding:12px;margin-top:10px;">
+        <button style="width:100%;padding:12px;margin-top:20px;">Verify</button>
+    </form>
+
+    <p id="mfaMessage" style="margin-top:15px;color:#fb7185;"></p>
+
+    <a id="backToLogin" href="/login.html" style="display:none;color:#38bdf8;">
+        Back to login
+    </a>
+</div>
+
+<script>
+document.getElementById("mfaForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const response = await fetch("/api/mfa", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    const message = document.getElementById("mfaMessage");
+    const form = document.getElementById("mfaForm");
+    const back = document.getElementById("backToLogin");
+
+    if (data.status === "success") {
+        message.style.color = "#22c55e";
+        message.innerText = data.message;
+        form.style.display = "none";
+    } else {
+        message.style.color = "#fb7185";
+        message.innerText = data.message;
+        form.style.display = "none";
+        back.style.display = "block";
+    }
+});
+</script>
+
+</body>
+</html>
