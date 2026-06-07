@@ -1,0 +1,22 @@
+# ════════════════════════════════════════════════════════════════════════════
+# Mode B — password Unix + TOTP via PAM
+# ════════════════════════════════════════════════════════════════════════════
+# sshd_config : AuthenticationMethods password,keyboard-interactive:pam
+#   1) sshd transmet le password → PAM le valide via pam_unix
+#   2) PAM enchaîne avec pam_google_authenticator (TOTP)
+
+# Anti brute-force (preauth : silencieux, juste pour vérifier l'état)
+auth        required      pam_faillock.so preauth silent deny=5 unlock_time=1800
+
+# Password Unix (vérifié contre /etc/shadow)
+auth        required      pam_unix.so
+
+# Second facteur TOTP Google Authenticator
+auth        required      pam_google_authenticator.so
+
+# Incrémente le compteur d'échecs si l'un des modules ci-dessus a raté
+auth        [default=die] pam_faillock.so authfail deny=5 unlock_time=1800
+
+account     required      pam_faillock.so
+account     required      pam_permit.so
+session     required      pam_permit.so

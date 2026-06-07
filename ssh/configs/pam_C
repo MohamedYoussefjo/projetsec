@@ -1,0 +1,20 @@
+# ════════════════════════════════════════════════════════════════════════════
+# Mode C — clé publique (vérifiée par sshd) + TOTP via PAM
+# ════════════════════════════════════════════════════════════════════════════
+# sshd_config : AuthenticationMethods publickey,keyboard-interactive
+#   1) sshd vérifie la clé publique (PAM n'intervient pas)
+#   2) PAM ne vérifie que le TOTP via pam_google_authenticator
+#      (pas de pam_unix : pas de password à demander)
+
+# Anti brute-force (preauth)
+auth        required      pam_faillock.so preauth silent deny=5 unlock_time=1800
+
+# Second facteur TOTP uniquement
+auth        required      pam_google_authenticator.so
+
+# Compteur d'échecs
+auth        [default=die] pam_faillock.so authfail deny=5 unlock_time=1800
+
+account     required      pam_faillock.so
+account     required      pam_permit.so
+session     required      pam_permit.so

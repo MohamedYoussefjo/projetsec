@@ -1,0 +1,7 @@
+# ════════════════════════════════════════════════════════════════════════════
+# Mode A — password only, sans PAM
+# ════════════════════════════════════════════════════════════════════════════
+# sshd_config a UsePAM no → ce fichier n'est pas chargé par sshd.
+# Présent uniquement pour ne pas casser un build qui s'attend à le trouver.
+account     required      pam_permit.so
+session     required      pam_permit.so
