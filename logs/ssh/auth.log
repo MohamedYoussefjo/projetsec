@@ -1,0 +1,66 @@
+2026-06-06T16:35:51.268494+00:00 f23112c17e82 sshd[10]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T16:35:51.268520+00:00 f23112c17e82 sshd[10]: Server listening on :: port 2222.
+2026-06-06T16:37:15.018099+00:00 f23112c17e82 sshd[12]: Connection from 192.168.80.129 port 49422 on 172.18.0.4 port 2222 rdomain ""
+2026-06-06T16:37:15.106795+00:00 f23112c17e82 sshd[12]: Accepted key ED25519 SHA256:7dpS5jqRM9YQyee9bF88fI4U35oaaaHM+H4txn6Pr78 found at /home/admin/.ssh/authorized_keys:1
+2026-06-06T16:37:15.108110+00:00 f23112c17e82 sshd[12]: Postponed publickey for admin from 192.168.80.129 port 49422 ssh2 [preauth]
+2026-06-06T16:37:16.911956+00:00 f23112c17e82 sshd[12]: Accepted key ED25519 SHA256:7dpS5jqRM9YQyee9bF88fI4U35oaaaHM+H4txn6Pr78 found at /home/admin/.ssh/authorized_keys:1
+2026-06-06T16:37:16.913230+00:00 f23112c17e82 sshd[12]: Partial publickey for admin from 192.168.80.129 port 49422 ssh2: ED25519 SHA256:7dpS5jqRM9YQyee9bF88fI4U35oaaaHM+H4txn6Pr78
+2026-06-06T16:37:16.929785+00:00 f23112c17e82 sshd[12]: Postponed keyboard-interactive for admin from 192.168.80.129 port 49422 ssh2 [preauth]
+2026-06-06T16:37:25.349181+00:00 f23112c17e82 sshd(pam_google_authenticator)[14]: Accepted google_authenticator for admin
+2026-06-06T16:37:25.357209+00:00 f23112c17e82 sshd[12]: Postponed keyboard-interactive/pam for admin from 192.168.80.129 port 49422 ssh2 [preauth]
+2026-06-06T16:37:25.357414+00:00 f23112c17e82 sshd[12]: Accepted keyboard-interactive/pam for admin from 192.168.80.129 port 49422 ssh2
+2026-06-06T16:37:25.359508+00:00 f23112c17e82 sshd[12]: User child is on pid 15
+2026-06-06T16:37:25.405474+00:00 f23112c17e82 sshd[12]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-06T16:37:25.405810+00:00 f23112c17e82 sshd[12]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-06T16:37:25.406454+00:00 f23112c17e82 sshd[15]: Starting session: shell on pts/0 for admin from 192.168.80.129 port 49422 id 0
+2026-06-06T16:37:28.763108+00:00 f23112c17e82 sshd[12]: syslogin_perform_logout: logout() returned an error
+2026-06-06T16:37:28.763532+00:00 f23112c17e82 sshd[15]: Received disconnect from 192.168.80.129 port 49422:11: disconnected by user
+2026-06-06T16:37:28.763747+00:00 f23112c17e82 sshd[15]: Disconnected from user admin 192.168.80.129 port 49422
+2026-06-06T19:51:30.405181+00:00 33b0a4377c62 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T19:51:30.405327+00:00 33b0a4377c62 sshd[1]: Server listening on :: port 2222.
+2026-06-06T19:53:40.099651+00:00 33b0a4377c62 sshd[1]: Received signal 15; terminating.
+2026-06-06T19:54:46.548939+00:00 cd890d0492e1 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T19:54:46.548973+00:00 cd890d0492e1 sshd[1]: Server listening on :: port 2222.
+2026-06-06T19:56:24.697601+00:00 cd890d0492e1 sshd[1]: Received signal 15; terminating.
+2026-06-06T19:57:30.789248+00:00 86f59e09ca80 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T19:57:30.789276+00:00 86f59e09ca80 sshd[1]: Server listening on :: port 2222.
+2026-06-06T20:00:03.737822+00:00 86f59e09ca80 sshd[1]: Received signal 15; terminating.
+2026-06-06T20:00:27.763236+00:00 5c7cd375282d sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T20:00:27.763260+00:00 5c7cd375282d sshd[1]: Server listening on :: port 2222.
+2026-06-06T21:01:44.815001+00:00 5c7cd375282d sshd[1]: Received signal 15; terminating.
+2026-06-06T21:03:11.308104+00:00 00cb8d714e27 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T21:03:11.308140+00:00 00cb8d714e27 sshd[1]: Server listening on :: port 2222.
+2026-06-06T21:03:22.585651+00:00 00cb8d714e27 sshd[1]: Received signal 15; terminating.
+2026-06-06T21:03:29.568195+00:00 08f517662a44 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T21:03:29.568225+00:00 08f517662a44 sshd[1]: Server listening on :: port 2222.
+2026-06-06T21:03:42.101854+00:00 08f517662a44 sshd[1660]: Connection from 192.168.80.129 port 43990 on 172.18.0.2 port 2222 rdomain ""
+2026-06-06T21:03:42.121843+00:00 08f517662a44 sshd[1660]: Connection closed by 192.168.80.129 port 43990 [preauth]
+2026-06-06T21:03:56.809613+00:00 08f517662a44 sshd[1662]: Connection from 192.168.80.129 port 43012 on 172.18.0.2 port 2222 rdomain ""
+2026-06-06T21:04:04.046102+00:00 08f517662a44 sshd[1662]: Accepted password for admin from 192.168.80.129 port 43012 ssh2
+2026-06-06T21:04:04.056037+00:00 08f517662a44 sshd[1662]: User child is on pid 1664
+2026-06-06T21:04:04.069210+00:00 08f517662a44 sshd[1662]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-06T21:04:04.069585+00:00 08f517662a44 sshd[1662]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-06T21:04:04.070281+00:00 08f517662a44 sshd[1664]: Starting session: shell on pts/0 for admin from 192.168.80.129 port 43012 id 0
+2026-06-06T21:04:06.798010+00:00 08f517662a44 sshd[1664]: Close session: user admin from 192.168.80.129 port 43012 id 0
+2026-06-06T21:04:06.798291+00:00 08f517662a44 sshd[1664]: Received disconnect from 192.168.80.129 port 43012:11: disconnected by user
+2026-06-06T21:04:06.798475+00:00 08f517662a44 sshd[1664]: Disconnected from user admin 192.168.80.129 port 43012
+2026-06-06T21:04:06.799318+00:00 08f517662a44 sshd[1662]: syslogin_perform_logout: logout() returned an error
+2026-06-06T21:19:10.006723+00:00 08f517662a44 sshd[1670]: Connection from 172.18.0.1 port 47872 on 172.18.0.2 port 2222 rdomain ""
+2026-06-06T21:19:10.060773+00:00 08f517662a44 sshd[1670]: Received disconnect from 172.18.0.1 port 47872:11: Bye Bye [preauth]
+2026-06-06T21:19:10.060845+00:00 08f517662a44 sshd[1670]: Disconnected from authenticating user admin 172.18.0.1 port 47872 [preauth]
+2026-06-06T21:19:10.297951+00:00 08f517662a44 sshd[1673]: Connection from 172.18.0.1 port 47884 on 172.18.0.2 port 2222 rdomain ""
+2026-06-06T21:19:10.298566+00:00 08f517662a44 sshd[1672]: Connection from 172.18.0.1 port 47882 on 172.18.0.2 port 2222 rdomain ""
+2026-06-06T21:19:10.457444+00:00 08f517662a44 sshd[1673]: Failed password for admin from 172.18.0.1 port 47884 ssh2
+2026-06-06T21:19:10.462731+00:00 08f517662a44 sshd[1672]: Failed password for admin from 172.18.0.1 port 47882 ssh2
+2026-06-06T21:19:10.646273+00:00 08f517662a44 sshd[1673]: Failed password for admin from 172.18.0.1 port 47884 ssh2
+2026-06-06T21:19:10.651390+00:00 08f517662a44 sshd[1672]: Failed password for admin from 172.18.0.1 port 47882 ssh2
+2026-06-06T21:19:10.682574+00:00 08f517662a44 sshd[1673]: Failed password for admin from 172.18.0.1 port 47884 ssh2
+2026-06-06T21:19:10.693750+00:00 08f517662a44 sshd[1672]: Failed password for admin from 172.18.0.1 port 47882 ssh2
+2026-06-06T21:19:10.694776+00:00 08f517662a44 sshd[1673]: error: maximum authentication attempts exceeded for admin from 172.18.0.1 port 47884 ssh2 [preauth]
+2026-06-06T21:19:10.694791+00:00 08f517662a44 sshd[1673]: Disconnecting authenticating user admin 172.18.0.1 port 47884: Too many authentication failures [preauth]
+2026-06-06T21:19:10.706283+00:00 08f517662a44 sshd[1672]: error: maximum authentication attempts exceeded for admin from 172.18.0.1 port 47882 ssh2 [preauth]
+2026-06-06T21:19:10.706315+00:00 08f517662a44 sshd[1672]: Disconnecting authenticating user admin 172.18.0.1 port 47882: Too many authentication failures [preauth]
+2026-06-06T21:55:33.900449+00:00 08f517662a44 sshd[1]: Received signal 15; terminating.
+2026-06-06T22:34:19.120295+00:00 03dd983f8e35 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-06T22:34:19.120322+00:00 03dd983f8e35 sshd[1]: Server listening on :: port 2222.
+2026-06-06T22:49:02.386457+00:00 03dd983f8e35 sshd[1]: Received signal 15; terminating.
