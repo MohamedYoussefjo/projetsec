@@ -1,0 +1,2 @@
+{"timestamp": "2026-06-06T20:00:53.160067Z", "action": "ban", "source_ip": "172.18.0.1", "reason": "web critical risk_level", "containers": ["ssh", "nginx"], "ban_duration_s": 3600, "expires_at": "2026-06-06T21:00:53.158971Z"}
+{"timestamp": "2026-06-06T21:01:00.367164Z", "action": "unban", "source_ip": "172.18.0.1", "reason": "ttl_expired"}
