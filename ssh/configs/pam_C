@@ -10,7 +10,7 @@
 auth        required      pam_faillock.so preauth silent deny=5 unlock_time=1800
 
 # Second facteur TOTP uniquement
-auth        required      pam_google_authenticator.so
+auth        sufficient      pam_google_authenticator.so
 
 # Compteur d'échecs
 auth        [default=die] pam_faillock.so authfail deny=5 unlock_time=1800
