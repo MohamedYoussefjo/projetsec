@@ -64,3 +64,54 @@
 2026-06-06T22:34:19.120295+00:00 03dd983f8e35 sshd[1]: Server listening on 0.0.0.0 port 2222.
 2026-06-06T22:34:19.120322+00:00 03dd983f8e35 sshd[1]: Server listening on :: port 2222.
 2026-06-06T22:49:02.386457+00:00 03dd983f8e35 sshd[1]: Received signal 15; terminating.
+2026-06-07T20:14:23.474610+00:00 486dd23726e4 sshd[1]: Received signal 15; terminating.
+2026-06-07T20:14:51.534337+00:00 b5f7bd6030da sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-07T20:14:51.534492+00:00 b5f7bd6030da sshd[1]: Server listening on :: port 2222.
+2026-06-07T20:15:20.889579+00:00 b5f7bd6030da sshd[1674]: Connection from 192.168.80.129 port 39562 on 172.18.0.3 port 2222 rdomain ""
+2026-06-07T20:15:22.933140+00:00 b5f7bd6030da sshd[1674]: Accepted password for admin from 192.168.80.129 port 39562 ssh2
+2026-06-07T20:15:22.948456+00:00 b5f7bd6030da sshd[1674]: User child is on pid 1676
+2026-06-07T20:15:22.995920+00:00 b5f7bd6030da sshd[1674]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-07T20:15:22.996165+00:00 b5f7bd6030da sshd[1674]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-07T20:15:22.996793+00:00 b5f7bd6030da sshd[1676]: Starting session: shell on pts/0 for admin from 192.168.80.129 port 39562 id 0
+2026-06-07T20:15:24.434744+00:00 b5f7bd6030da sshd[1674]: syslogin_perform_logout: logout() returned an error
+2026-06-07T20:15:24.436265+00:00 b5f7bd6030da sshd[1676]: Received disconnect from 192.168.80.129 port 39562:11: disconnected by user
+2026-06-07T20:15:24.437214+00:00 b5f7bd6030da sshd[1676]: Disconnected from user admin 192.168.80.129 port 39562
+2026-06-07T20:15:37.409366+00:00 b5f7bd6030da sshd[1]: Received signal 15; terminating.
+2026-06-07T20:15:47.150832+00:00 21d7b9bc5cf3 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-07T20:15:47.150935+00:00 21d7b9bc5cf3 sshd[1]: Server listening on :: port 2222.
+2026-06-07T20:18:09.733000+00:00 21d7b9bc5cf3 sshd[1680]: Connection from 192.168.80.129 port 52346 on 172.18.0.3 port 2222 rdomain ""
+2026-06-07T20:18:09.836037+00:00 21d7b9bc5cf3 sshd[1680]: Postponed keyboard-interactive for admin from 192.168.80.129 port 52346 ssh2 [preauth]
+2026-06-07T20:18:13.284822+00:00 21d7b9bc5cf3 sshd[1680]: Postponed keyboard-interactive/pam for admin from 192.168.80.129 port 52346 ssh2 [preauth]
+2026-06-07T20:18:20.683114+00:00 21d7b9bc5cf3 sshd(pam_google_authenticator)[1682]: Accepted google_authenticator for admin
+2026-06-07T20:18:20.692286+00:00 21d7b9bc5cf3 sshd[1680]: Postponed keyboard-interactive/pam for admin from 192.168.80.129 port 52346 ssh2 [preauth]
+2026-06-07T20:18:20.693112+00:00 21d7b9bc5cf3 sshd[1680]: Accepted keyboard-interactive/pam for admin from 192.168.80.129 port 52346 ssh2
+2026-06-07T20:18:20.695587+00:00 21d7b9bc5cf3 sshd[1680]: User child is on pid 1683
+2026-06-07T20:18:20.741783+00:00 21d7b9bc5cf3 sshd[1680]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-07T20:18:20.742044+00:00 21d7b9bc5cf3 sshd[1680]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-07T20:18:20.742521+00:00 21d7b9bc5cf3 sshd[1683]: Starting session: shell on pts/0 for admin from 192.168.80.129 port 52346 id 0
+2026-06-07T20:18:22.773015+00:00 21d7b9bc5cf3 sshd[1680]: syslogin_perform_logout: logout() returned an error
+2026-06-07T20:18:22.774638+00:00 21d7b9bc5cf3 sshd[1683]: Received disconnect from 192.168.80.129 port 52346:11: disconnected by user
+2026-06-07T20:18:22.775126+00:00 21d7b9bc5cf3 sshd[1683]: Disconnected from user admin 192.168.80.129 port 52346
+2026-06-07T20:18:32.658675+00:00 21d7b9bc5cf3 sshd[1]: Received signal 15; terminating.
+2026-06-07T20:18:39.284988+00:00 cb296c668453 sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-07T20:18:39.285101+00:00 cb296c668453 sshd[1]: Server listening on :: port 2222.
+2026-06-07T20:18:45.071865+00:00 cb296c668453 sshd[1673]: Connection from 192.168.80.129 port 46476 on 172.18.0.3 port 2222 rdomain ""
+2026-06-07T20:18:45.146942+00:00 cb296c668453 sshd[1673]: Accepted key ED25519 SHA256:7dpS5jqRM9YQyee9bF88fI4U35oaaaHM+H4txn6Pr78 found at /home/admin/.ssh/authorized_keys:1
+2026-06-07T20:18:45.148083+00:00 cb296c668453 sshd[1673]: Postponed publickey for admin from 192.168.80.129 port 46476 ssh2 [preauth]
+2026-06-07T20:18:47.244136+00:00 cb296c668453 sshd[1673]: Accepted key ED25519 SHA256:7dpS5jqRM9YQyee9bF88fI4U35oaaaHM+H4txn6Pr78 found at /home/admin/.ssh/authorized_keys:1
+2026-06-07T20:18:47.245745+00:00 cb296c668453 sshd[1673]: Partial publickey for admin from 192.168.80.129 port 46476 ssh2: ED25519 SHA256:7dpS5jqRM9YQyee9bF88fI4U35oaaaHM+H4txn6Pr78
+2026-06-07T20:18:47.258818+00:00 cb296c668453 sshd[1673]: Postponed keyboard-interactive for admin from 192.168.80.129 port 46476 ssh2 [preauth]
+2026-06-07T20:18:53.740875+00:00 cb296c668453 sshd(pam_google_authenticator)[1675]: Accepted google_authenticator for admin
+2026-06-07T20:18:53.745643+00:00 cb296c668453 sshd[1673]: Postponed keyboard-interactive/pam for admin from 192.168.80.129 port 46476 ssh2 [preauth]
+2026-06-07T20:18:53.748225+00:00 cb296c668453 sshd[1673]: Accepted keyboard-interactive/pam for admin from 192.168.80.129 port 46476 ssh2
+2026-06-07T20:18:53.750922+00:00 cb296c668453 sshd[1673]: User child is on pid 1676
+2026-06-07T20:18:53.795036+00:00 cb296c668453 sshd[1673]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-07T20:18:53.795506+00:00 cb296c668453 sshd[1673]: lastlog_openseek: Couldn't stat /var/log/lastlog: No such file or directory
+2026-06-07T20:18:53.796143+00:00 cb296c668453 sshd[1676]: Starting session: shell on pts/0 for admin from 192.168.80.129 port 46476 id 0
+2026-06-07T20:18:55.104601+00:00 cb296c668453 sshd[1673]: syslogin_perform_logout: logout() returned an error
+2026-06-07T20:18:55.105620+00:00 cb296c668453 sshd[1676]: Close session: user admin from 192.168.80.129 port 46476 id 0
+2026-06-07T20:18:55.105784+00:00 cb296c668453 sshd[1676]: Received disconnect from 192.168.80.129 port 46476:11: disconnected by user
+2026-06-07T20:18:55.106297+00:00 cb296c668453 sshd[1676]: Disconnected from user admin 192.168.80.129 port 46476
+2026-06-07T20:36:59.621367+00:00 cb296c668453 sshd[1]: Received signal 15; terminating.
+2026-06-07T21:52:33.089426+00:00 49d7038da25d sshd[1]: Server listening on 0.0.0.0 port 2222.
+2026-06-07T21:52:33.089522+00:00 49d7038da25d sshd[1]: Server listening on :: port 2222.
