@@ -30,7 +30,7 @@ if docker ps --format '{{.Names}}' | grep -q '^ssh$'; then
     docker exec ssh faillock --user testuser --reset 2>/dev/null || true
 fi
 
-docker compose up -d --force-recreate --build ssh
+docker-compose up -d --force-recreate --build ssh
 echo "[switch_mode] ssh container recreated."
 
 sleep 2

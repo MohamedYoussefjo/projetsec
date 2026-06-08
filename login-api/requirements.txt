@@ -2,4 +2,4 @@ flask
 flask-wtf
 pyotp
 requests
-
+argon2-cffi

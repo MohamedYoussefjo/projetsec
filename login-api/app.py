@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, make_response, session
 from datetime import datetime
 from collections import defaultdict
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, VerificationError
 import json
 import os
 import time
@@ -12,7 +14,13 @@ app = Flask(__name__)
 app.secret_key = "secret-key"
 
 VALID_USER = "admin"
-VALID_PASSWORD = "SecurePass123!"
+VALID_PASSWORD_HASH = "$argon2id$v=19$m=65536,t=3,p=2$QB5T+R+aeLV0wsjy4MWq+w$hzHIZc344ShbfS43HBD4jFgylwfTsD7j2wbm6UnOPGs"
+
+ph = PasswordHasher(
+    time_cost=3,
+    memory_cost=65536,
+    parallelism=2
+)
 
 MFA_SECRET = "JBSWY3DPEHPK3PXP"
 RECAPTCHA_SECRET = "6Ld0aPwsAAAAAP4b6iLliO9J4s3O9168EW-CkoST"
@@ -28,6 +36,11 @@ ip_next_allowed_time = defaultdict(float)
 
 recovery_tokens = {}
 
+def verify_password(password, stored_hash):
+    try:
+        return ph.verify(stored_hash, password)
+    except (VerifyMismatchError, VerificationError):
+        return False
 
 def utc_now():
     return datetime.utcnow().isoformat()
@@ -241,7 +254,7 @@ def login():
         response.headers["Retry-After"] = str(retry_after)
         return response
 
-    password_success = username == VALID_USER and password == VALID_PASSWORD
+    password_success = username == VALID_USER and verify_password(password, VALID_PASSWORD_HASH)
 
     if not password_success:
         account_failures[username] += 1
