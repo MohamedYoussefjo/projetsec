@@ -35,13 +35,13 @@ BAN_TARGETS = [t.strip() for t in os.environ.get(
 # offenders are aggregated by source_ip; otherwise every matched doc bans.
 BAN_RULES = [
     {
-        "name": "ssh_burst_summary >=10",
+        "name": "ssh_burst_summary >=3",
         "count_threshold": None,
         "query": {
             "bool": {
                 "must": [
                     {"term": {"event_type": "ssh_burst_summary"}},
-                    {"range": {"burst_count": {"gte": 10}}},
+                    {"range": {"burst_count": {"gte": 3}}},
                     {"range": {"@timestamp": {"gte": f"now-{LOOKBACK_S}s"}}},
                 ]
             }
