@@ -16,6 +16,12 @@ app.secret_key = "secret-key"
 VALID_USER = "admin"
 VALID_PASSWORD_HASH = "$argon2id$v=19$m=65536,t=3,p=2$QB5T+R+aeLV0wsjy4MWq+w$hzHIZc344ShbfS43HBD4jFgylwfTsD7j2wbm6UnOPGs"
 
+HONEY_ACCOUNTS = {
+    "backup_admin": "$argon2id$v=19$m=65536,t=3,p=2$PjVHF/qevPYXlsRCsFaqPQ$38ptwlD4ZzqTnqXHgDAdx0gNIGEQNO+QtKVGixMyVKQ",
+    "audit_service": "$argon2id$v=19$m=65536,t=3,p=2$+ryLkUGT8bx328NNHqPAdg$F+BEFiXvUl3TnL5zxxPEXldL0mlCJocnCaEte9Ag+Cc",
+    "old_admin": "$argon2id$v=19$m=65536,t=3,p=2$/e7w3Yj/eOxANvDGUSBNDw$Yjr2Fp2ac+T6ueARKnLxLkOjrYzOS+2MVoQQSLRhD40"
+}
+
 ph = PasswordHasher(
     time_cost=3,
     memory_cost=65536,
@@ -189,6 +195,24 @@ def login():
             "status": "failed",
             "message": "reCAPTCHA verification failed."
         }), 400
+        
+    if username in HONEY_ACCOUNTS:
+        honey_password_match = verify_password(password, HONEY_ACCOUNTS[username])
+
+        log_event({
+            "event_type": "honey_account_triggered",
+            "username": username,
+            "source_ip": get_client_ip(),
+            "honey_password_match": honey_password_match,
+            "risk_level": "critical",
+            "message": "Tentative de connexion sur un compte leurre",
+            "final_auth_success": False
+        })
+
+        return jsonify({
+            "status": "failed",
+            "message": "Invalid username or password."
+        }), 401
 
     if now < ip_next_allowed_time[ip]:
         retry_after = int(ip_next_allowed_time[ip] - now)

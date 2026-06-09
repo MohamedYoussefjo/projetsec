@@ -2,3 +2,4 @@
 {"timestamp": "2026-06-06T21:01:00.367164Z", "action": "unban", "source_ip": "172.18.0.1", "reason": "ttl_expired"}
 {"timestamp": "2026-06-07T20:40:27.208221Z", "action": "ban", "source_ip": "172.18.0.1", "reason": "web critical risk_level", "containers": ["ssh", "nginx"], "ban_duration_s": 3600, "expires_at": "2026-06-07T21:40:27.208204Z"}
 {"timestamp": "2026-06-07T21:52:29.039220Z", "action": "unban", "source_ip": "172.18.0.1", "reason": "ttl_expired"}
+{"timestamp": "2026-06-09T23:19:39.604346Z", "action": "ban", "source_ip": "172.18.0.1", "reason": "web critical risk_level", "containers": ["ssh", "nginx"], "ban_duration_s": 3600, "expires_at": "2026-06-10T00:19:39.604028Z"}
