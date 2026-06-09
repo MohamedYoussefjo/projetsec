@@ -1,11 +1,4 @@
 """
-IfSecurity Detector v2 — close the detection→response loop.
-
-Reads structured events from Elasticsearch (if27-web-* + if27-ssh-*),
-computes risk per source IP, and bans offending IPs by exec-ing
-`iptables -A INPUT -s <ip> -j DROP` inside the ssh and nginx containers
-via the Docker socket.
-
 Bans are time-limited (UNBAN_AFTER_S, default 1h) and audited to
 /app/logs/bans.log (JSON Lines).
 """
@@ -90,6 +83,103 @@ BAN_RULES = [
 es = Elasticsearch(ES_URL, request_timeout=10)
 dk = docker.from_env()
 banned = {}   # ip -> {"until": ts, "reason": str, "containers": [str]}
+
+#--------other Rules-------------------
+def detect_distributed_ssh_bruteforce():
+    resp = es.search(
+        index=INDEX_PATTERN,
+        size=0,
+        query={
+            "bool": {
+                "must": [
+                    {"term": {"event_type": "ssh_failed_password"}},
+                    {"exists": {"field": "source_ip.keyword"}},
+                    {"exists": {"field": "username.keyword"}},
+                    {"range": {"@timestamp": {"gte": f"now-{LOOKBACK_S}s"}}},
+                ]
+            }
+        },
+        aggs={
+            "by_user": {
+                "terms": {
+                    "field": "username.keyword",
+                    "size": 20,
+                    "min_doc_count": 5
+                },
+                "aggs": {
+                    "unique_ips": {
+                        "cardinality": {
+                            "field": "source_ip.keyword"
+                        }
+                    },
+                    "ips": {
+                        "terms": {
+                            "field": "source_ip.keyword",
+                            "size": 50
+                        }
+                    }
+                }
+            }
+        }
+    )
+
+    for user_bucket in resp["aggregations"]["by_user"]["buckets"]:
+        username = user_bucket["key"]
+        total_failures = user_bucket["doc_count"]
+        unique_ip_count = user_bucket["unique_ips"]["value"]
+
+        if unique_ip_count >= 5 and total_failures >= 5:
+            for ip_bucket in user_bucket["ips"]["buckets"]:
+                ip = ip_bucket["key"]
+                ban(
+                    ip,
+                    f"distributed SSH bruteforce on user={username} "
+                    f"(unique_ips={unique_ip_count}, total_failures={total_failures})"
+                )
+                
+def detect_username_spray_by_ip():
+    resp = es.search(
+        index=INDEX_PATTERN,
+        size=0,
+        query={
+            "bool": {
+                "must": [
+                    {"term": {"event_type": "ssh_failed_password"}},
+                    {"exists": {"field": "source_ip.keyword"}},
+                    {"exists": {"field": "username.keyword"}},
+                    {"range": {"@timestamp": {"gte": f"now-{LOOKBACK_S}s"}}},
+                ]
+            }
+        },
+        aggs={
+            "by_ip": {
+                "terms": {
+                    "field": "source_ip.keyword",
+                    "size": 100
+                },
+                "aggs": {
+                    "unique_users": {
+                        "cardinality": {
+                            "field": "username.keyword"
+                        }
+                    }
+                }
+            }
+        }
+    )
+
+    for b in resp["aggregations"]["by_ip"]["buckets"]:
+        ip = b["key"]
+        attempts = b["doc_count"]
+        unique_users = b["unique_users"]["value"]
+
+        if unique_users >= 5 and attempts >= 5:
+            ban(
+                ip,
+                f"username spray from single IP "
+                f"(unique_users={unique_users}, attempts={attempts})"
+            )
+
 
 
 # ─── Helpers ───────────────────────────────────────────────────────────────
@@ -208,7 +298,15 @@ def evaluate():
                     ban(b["key"], f"{rule['name']} (count={b['doc_count']})")
         except Exception as e:
             print(f"[detector] rule '{rule['name']}' failed: {e}", flush=True)
+    try:
+        detect_username_spray_by_ip()
+    except Exception as e:
+        print(f"[detector] username spray rule failed: {e}", flush=True)
 
+    try:
+        detect_distributed_ssh_bruteforce()
+    except Exception as e:
+        print(f"[detector] distributed bruteforce rule failed: {e}", flush=True)
 
 def wait_for_es():
     while True:
