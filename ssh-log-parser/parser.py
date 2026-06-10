@@ -18,6 +18,14 @@ import socket
 import time
 from datetime import datetime
 
+
+
+# ─── Honey accounts SSH (mêmes noms que côté Web) ───────────────────────
+HONEY_USERS = [u.strip() for u in os.environ.get(
+    "HONEY_USERS",
+    "backup_admin,audit_service,old_admin"
+).split(",") if u.strip()]
+
 AUTH_LOG = os.environ.get("SSH_LOG", "/sshlogs/auth.log")
 OUT_LOG = os.environ.get("OUT_LOG", "/app/logs/ssh_attempts.log")
 HOSTNAME = socket.gethostname()
