@@ -510,6 +510,19 @@ def follow(path: str):
 def _emit(event):
     """Write an event to disk and stdout."""
     event = {k: v for k, v in event.items() if v is not None}
+
+        # ─── Honey account detection ────────────────────────────────────────
+    # Toute tentative d'auth sur un username de la liste honey → risk=honey
+    username = event.get("username")
+    if username and username in HONEY_USERS and event.get("event_type", "").startswith(
+        ("ssh_failed_", "ssh_invalid_", "ssh_accepted_", "pam_")
+    ):
+        event["event_type"] = "ssh_honey_account_triggered"
+        event["risk_level"] = "honey"
+        event["honey_target"] = username
+        event["message"] = "Tentative SSH sur un compte leurre"
+        
+        
     with open(OUT_LOG, "a", encoding="utf-8") as out:
         out.write(json.dumps(event, ensure_ascii=False) + "\n")
     print(
