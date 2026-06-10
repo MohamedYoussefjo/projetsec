@@ -23,9 +23,9 @@ PEPPER = os.environ.get("PASSWORD_PEPPER", "if27-default-pepper-CHANGE-ME")
 # ─── Honey accounts (comptes leurres) ───────────────────────────────────
 # Toute tentative sur l'un de ces comptes déclenche un PERMA-BAN via R7.
 HONEY_ACCOUNTS = {
-    "backup_admin":  "$argon2id$v=19$m=65536,t=3,p=2$PjVHF/qevPYXlsRCsFaqPQ$38ptwlD4ZzqTnqXHgDAdx0gNIGEQNO+QtKVGixMyVKQ",
-    "audit_service": "$argon2id$v=19$m=65536,t=3,p=2$+ryLkUGT8bx328NNHqPAdg$F+BEFiXvUl3TnL5zxxPEXldL0mlCJocnCaEte9Ag+Cc",
-    "old_admin":     "$argon2id$v=19$m=65536,t=3,p=2$/e7w3Yj/eOxANvDGUSBNDw$Yjr2Fp2ac+T6ueARKnLxLkOjrYzOS+2MVoQQSLRhD40",
+    "backup_admin":  "$argon2id$v=19$m=65536,t=3,p=2$qRNndq5HaHjHmmuYOSLsYA$PihcG4NqBjh6awBO/EMzMNaU1+x5BmZHgsDoMiUh2Ow",
+    "audit_service": "$argon2id$v=19$m=65536,t=3,p=2$mFHNvl6qo9qzzyO+erVJTQ$XUOvGec5Eh3okNNGBv87xbzW3Hzyi7JY6YRZv3WA8+Y",
+    "old_admin":     "$argon2id$v=19$m=65536,t=3,p=2$WLcAKHuPfnpqrS/BMLYcxQ$9rKljXNAn5BP5cteRnhtRpNj8+l6sJ9EkWEXq951bg0",
 }
 
 ph = PasswordHasher(
