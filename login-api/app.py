@@ -6,7 +6,6 @@ from argon2.exceptions import VerifyMismatchError, VerificationError
 import json
 import os
 import time
-import secrets
 import pyotp
 import requests
 
@@ -16,10 +15,17 @@ app.secret_key = "secret-key"
 VALID_USER = "admin"
 VALID_PASSWORD_HASH = "$argon2id$v=19$m=65536,t=3,p=2$QB5T+R+aeLV0wsjy4MWq+w$hzHIZc344ShbfS43HBD4jFgylwfTsD7j2wbm6UnOPGs"
 
+# Pepper côté serveur — ajouté à chaque mot de passe AVANT hashing.
+# À conserver dans un vault (variable d'env / Docker secret), jamais dans le repo.
+# Sans le pepper, un hash volé reste incrackable.
+PEPPER = os.environ.get("PASSWORD_PEPPER", "if27-default-pepper-CHANGE-ME")
+
+# ─── Honey accounts (comptes leurres) ───────────────────────────────────
+# Toute tentative sur l'un de ces comptes déclenche un PERMA-BAN via R7.
 HONEY_ACCOUNTS = {
-    "backup_admin": "$argon2id$v=19$m=65536,t=3,p=2$PjVHF/qevPYXlsRCsFaqPQ$38ptwlD4ZzqTnqXHgDAdx0gNIGEQNO+QtKVGixMyVKQ",
+    "backup_admin":  "$argon2id$v=19$m=65536,t=3,p=2$PjVHF/qevPYXlsRCsFaqPQ$38ptwlD4ZzqTnqXHgDAdx0gNIGEQNO+QtKVGixMyVKQ",
     "audit_service": "$argon2id$v=19$m=65536,t=3,p=2$+ryLkUGT8bx328NNHqPAdg$F+BEFiXvUl3TnL5zxxPEXldL0mlCJocnCaEte9Ag+Cc",
-    "old_admin": "$argon2id$v=19$m=65536,t=3,p=2$/e7w3Yj/eOxANvDGUSBNDw$Yjr2Fp2ac+T6ueARKnLxLkOjrYzOS+2MVoQQSLRhD40"
+    "old_admin":     "$argon2id$v=19$m=65536,t=3,p=2$/e7w3Yj/eOxANvDGUSBNDw$Yjr2Fp2ac+T6ueARKnLxLkOjrYzOS+2MVoQQSLRhD40",
 }
 
 ph = PasswordHasher(
@@ -40,13 +46,14 @@ account_lock_level = defaultdict(lambda: "none")
 ip_failures = defaultdict(int)
 ip_next_allowed_time = defaultdict(float)
 
-recovery_tokens = {}
 
 def verify_password(password, stored_hash):
+    """Vérifie un mot de passe en lui ajoutant le pepper avant Argon2id."""
     try:
-        return ph.verify(stored_hash, password)
+        return ph.verify(stored_hash, PEPPER + password)
     except (VerifyMismatchError, VerificationError):
         return False
+
 
 def utc_now():
     return datetime.utcnow().isoformat()
@@ -195,25 +202,24 @@ def login():
             "status": "failed",
             "message": "reCAPTCHA verification failed."
         }), 400
-        
+
+    # ─── Honey account : risk_level=honey → R7 du detector = PERMA-BAN ──
     if username in HONEY_ACCOUNTS:
         honey_password_match = verify_password(password, HONEY_ACCOUNTS[username])
 
-        log_event({
-            "timestamp": utc_now(),
-            "attack_surface": "web_login",
-            "app_service": "ifsecurity-login",
+        event = base_event()
+        event.update({
             "event_type": "honey_account_triggered",
             "action": "honey_account_triggered",
             "username": username,
-            "source_ip": get_client_ip(),
-            "honey_password_match": honey_password_match,
-            "risk_level": "honey",                            
+            "honey_password_match": bool(honey_password_match),
+            "risk_level": "honey",
             "message": "Tentative de connexion sur un compte leurre",
-            "final_auth_success": False,
             "password_success": False,
+            "final_auth_success": False,
             "log_source": "web"
         })
+        log_event(event)
 
         return jsonify({
             "status": "failed",
@@ -277,8 +283,7 @@ def login():
         response = make_response(jsonify({
             "status": "locked",
             "message": "Account temporarily locked.",
-            "lock_level": account_lock_level[username],
-            "recovery": "/api/recover"
+            "lock_level": account_lock_level[username]
         }), 423)
 
         response.headers["Retry-After"] = str(retry_after)
@@ -444,109 +449,6 @@ def mfa_verify():
         "status": "failed",
         "message": "Invalid MFA code. Session revoked. Please login again."
     }), 401
-
-
-@app.route("/recover", methods=["POST"])
-def recover():
-    username = request.form.get("username", "")
-    token = secrets.token_urlsafe(24)
-
-    recovery_tokens[token] = {
-        "username": username,
-        "expires_at": float(time.time() + 10 * 60)
-    }
-
-    event = base_event()
-    event.update({
-        "event_type": "account_recovery",
-        "action": "recovery_requested",
-        "risk_level": "medium",
-        "username": username,
-        "password_success": False,
-        "final_auth_success": False,
-        "recovery_token": token,
-        "token_expires_in": 600
-    })
-
-    log_event(event)
-
-    return jsonify({
-        "status": "recovery_started",
-        "message": "Recovery token generated. In a real system this would be sent by email.",
-        "demo_token": token,
-        "reset_endpoint": "/api/recover/reset"
-    })
-
-
-@app.route("/recover/reset", methods=["POST"])
-def recover_reset():
-    token = request.form.get("token", "")
-    token_data = recovery_tokens.get(token)
-
-    if not token_data:
-        event = base_event()
-        event.update({
-            "event_type": "account_recovery",
-            "action": "invalid_recovery_token",
-            "risk_level": "high",
-            "username": "",
-            "password_success": False,
-            "final_auth_success": False
-        })
-
-        log_event(event)
-
-        return jsonify({
-            "status": "failed",
-            "message": "Invalid recovery token."
-        }), 400
-
-    username = token_data["username"]
-
-    if time.time() > float(token_data["expires_at"]):
-        event = base_event()
-        event.update({
-            "event_type": "account_recovery",
-            "action": "expired_recovery_token",
-            "risk_level": "medium",
-            "username": username,
-            "password_success": False,
-            "final_auth_success": False
-        })
-
-        log_event(event)
-
-        return jsonify({
-            "status": "failed",
-            "message": "Recovery token expired."
-        }), 400
-
-    account_failures[username] = 0
-    account_locked_until[username] = 0.0
-    account_lock_level[username] = "recovered"
-
-    del recovery_tokens[token]
-
-    event = base_event()
-    event.update({
-        "event_type": "account_recovery",
-        "action": "account_recovered",
-        "risk_level": "low",
-        "username": username,
-        "password_success": False,
-        "final_auth_success": False,
-        "account_failures": int(account_failures[username]),
-        "account_lock_level": str(account_lock_level[username]),
-        "account_locked_until": float(account_locked_until[username]),
-        "account_locked": False
-    })
-
-    log_event(event)
-
-    return jsonify({
-        "status": "success",
-        "message": "Account recovered and unlocked."
-    })
 
 
 app.run(host="0.0.0.0", port=5000)
