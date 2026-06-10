@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = "secret-key"
 
 VALID_USER = "admin"
-VALID_PASSWORD_HASH = "$argon2id$v=19$m=65536,t=3,p=2$QB5T+R+aeLV0wsjy4MWq+w$hzHIZc344ShbfS43HBD4jFgylwfTsD7j2wbm6UnOPGs"
+VALID_PASSWORD_HASH = "$argon2id$v=19$m=65536,t=3,p=2$cORJH7OHf9yTlYvs1LblpQ$Xc9Hj+BJi2V73/QhuLkMRfO/DHpUxWKG7cS3x/CVwyM"
 
 # Pepper côté serveur — ajouté à chaque mot de passe AVANT hashing.
 # À conserver dans un vault (variable d'env / Docker secret), jamais dans le repo.
