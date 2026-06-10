@@ -200,13 +200,19 @@ def login():
         honey_password_match = verify_password(password, HONEY_ACCOUNTS[username])
 
         log_event({
+            "timestamp": utc_now(),
+            "attack_surface": "web_login",
+            "app_service": "ifsecurity-login",
             "event_type": "honey_account_triggered",
+            "action": "honey_account_triggered",
             "username": username,
             "source_ip": get_client_ip(),
             "honey_password_match": honey_password_match,
-            "risk_level": "critical",
+            "risk_level": "honey",                            
             "message": "Tentative de connexion sur un compte leurre",
-            "final_auth_success": False
+            "final_auth_success": False,
+            "password_success": False,
+            "log_source": "web"
         })
 
         return jsonify({
