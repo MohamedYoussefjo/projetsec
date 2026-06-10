@@ -17,6 +17,8 @@ services:
   login-api:
     build: ./login-api
     container_name: login-api
+    environment:
+      PASSWORD_PEPPER: ${PASSWORD_PEPPER}
     expose:
       - "5000"
     volumes:
