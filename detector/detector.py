@@ -1,6 +1,8 @@
 """
 Bans are time-limited (UNBAN_AFTER_S, default 1h) and audited to
 /app/logs/bans.log (JSON Lines).
+
+Honey-account hits (risk_level == "honey") trigger a PERMANENT ban.
 """
 
 import json
@@ -19,6 +21,9 @@ LOOKBACK_S      = int(os.environ.get("LOOKBACK_S", "120"))
 UNBAN_AFTER_S   = int(os.environ.get("UNBAN_AFTER_S", "3600"))
 BAN_LOG         = os.environ.get("BAN_LOG", "/app/logs/bans.log")
 
+# Approximation pratique d'un perma-ban : 10 ans
+PERMA_BAN_SECONDS = 10 * 365 * 24 * 3600
+
 # Containers where the iptables ban will be installed
 BAN_TARGETS = [t.strip() for t in os.environ.get(
     "BAN_TARGETS", "ssh,nginx"
@@ -26,10 +31,12 @@ BAN_TARGETS = [t.strip() for t in os.environ.get(
 
 # Detection rules. Each rule -> ES query. If a `count_threshold` is set,
 # offenders are aggregated by source_ip; otherwise every matched doc bans.
+# `permanent: True` -> ban perpétuel (auto-unban désactivé)
 BAN_RULES = [
     {
         "name": "ssh_burst_summary >=3",
         "count_threshold": None,
+        "permanent": False,
         "query": {
             "bool": {
                 "must": [
@@ -43,6 +50,7 @@ BAN_RULES = [
     {
         "name": "ssh_failed_password >=8 per IP",
         "count_threshold": 8,
+        "permanent": False,
         "query": {
             "bool": {
                 "must": [
@@ -55,6 +63,7 @@ BAN_RULES = [
     {
         "name": "ssh_invalid_user >=5 per IP",
         "count_threshold": 5,
+        "permanent": False,
         "query": {
             "bool": {
                 "must": [
@@ -67,6 +76,7 @@ BAN_RULES = [
     {
         "name": "web critical risk_level",
         "count_threshold": None,
+        "permanent": False,
         "query": {
             "bool": {
                 "must": [
@@ -77,14 +87,28 @@ BAN_RULES = [
             }
         },
     },
+    # ── R7 : honey account (Web + SSH) → PERMA-BAN ──────────────────────
+    {
+        "name": "honey account hit (PERMA)",
+        "count_threshold": None,
+        "permanent": True,
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"risk_level": "honey"}},
+                    {"range": {"@timestamp": {"gte": f"now-{LOOKBACK_S}s"}}},
+                ]
+            }
+        },
+    },
 ]
 
 # ─── Globals ───────────────────────────────────────────────────────────────
 es = Elasticsearch(ES_URL, request_timeout=10)
 dk = docker.from_env()
-banned = {}   # ip -> {"until": ts, "reason": str, "containers": [str]}
+banned = {}   # ip -> {"until": ts, "reason": str, "containers": [str], "permanent": bool}
 
-#--------other Rules-------------------
+# ─── Autres règles (distributed bruteforce, username spray) ────────────────
 def detect_distributed_ssh_bruteforce():
     resp = es.search(
         index=INDEX_PATTERN,
@@ -136,7 +160,8 @@ def detect_distributed_ssh_bruteforce():
                     f"distributed SSH bruteforce on user={username} "
                     f"(unique_ips={unique_ip_count}, total_failures={total_failures})"
                 )
-                
+
+
 def detect_username_spray_by_ip():
     resp = es.search(
         index=INDEX_PATTERN,
@@ -181,7 +206,6 @@ def detect_username_spray_by_ip():
             )
 
 
-
 # ─── Helpers ───────────────────────────────────────────────────────────────
 def log_event(event):
     os.makedirs(os.path.dirname(BAN_LOG), exist_ok=True)
@@ -222,7 +246,8 @@ def remove_ban(ip, containers):
             pass
 
 
-def ban(ip, reason):
+def ban(ip, reason, permanent=False):
+    """Bannit une IP. permanent=True désactive l'auto-unban."""
     if ip in banned or not ip or ip == "unknown":
         return False
 
@@ -230,11 +255,20 @@ def ban(ip, reason):
     if not installed_on:
         return False
 
-    until = time.time() + UNBAN_AFTER_S
+    if permanent:
+        until = time.time() + PERMA_BAN_SECONDS
+        expires_at = "PERMANENT"
+        duration_field = "PERMANENT"
+    else:
+        until = time.time() + UNBAN_AFTER_S
+        expires_at = datetime.utcfromtimestamp(until).isoformat() + "Z"
+        duration_field = UNBAN_AFTER_S
+
     banned[ip] = {
         "until": until,
         "reason": reason,
         "containers": installed_on,
+        "permanent": permanent,
     }
     log_event({
         "timestamp": utc_now_iso(),
@@ -242,16 +276,22 @@ def ban(ip, reason):
         "source_ip": ip,
         "reason": reason,
         "containers": installed_on,
-        "ban_duration_s": UNBAN_AFTER_S,
-        "expires_at": datetime.utcfromtimestamp(until).isoformat() + "Z",
+        "ban_duration_s": duration_field,
+        "expires_at": expires_at,
+        "permanent": permanent,
     })
-    print(f"[detector] BAN {ip} ({reason}) on {installed_on}", flush=True)
+    tag = "PERMA-BAN" if permanent else "BAN"
+    print(f"[detector] {tag} {ip} ({reason}) on {installed_on}", flush=True)
     return True
 
 
 def cleanup_expired():
+    """Retire les bans expirés. Les perma-bans ne sont JAMAIS retirés ici."""
     now = time.time()
     for ip in list(banned.keys()):
+        # Les perma-bans sont immortels (auto-unban désactivé)
+        if banned[ip].get("permanent"):
+            continue
         if banned[ip]["until"] <= now:
             remove_ban(ip, banned[ip]["containers"])
             log_event({
@@ -268,6 +308,8 @@ def cleanup_expired():
 def evaluate():
     for rule in BAN_RULES:
         try:
+            is_permanent = rule.get("permanent", False)
+
             if rule["count_threshold"] is None:
                 resp = es.search(
                     index=INDEX_PATTERN,
@@ -277,7 +319,7 @@ def evaluate():
                 )
                 for hit in resp["hits"]["hits"]:
                     ip = hit["_source"].get("source_ip")
-                    ban(ip, rule["name"])
+                    ban(ip, rule["name"], permanent=is_permanent)
             else:
                 resp = es.search(
                     index=INDEX_PATTERN,
@@ -295,9 +337,14 @@ def evaluate():
                 )
                 buckets = resp["aggregations"]["by_ip"]["buckets"]
                 for b in buckets:
-                    ban(b["key"], f"{rule['name']} (count={b['doc_count']})")
+                    ban(
+                        b["key"],
+                        f"{rule['name']} (count={b['doc_count']})",
+                        permanent=is_permanent,
+                    )
         except Exception as e:
             print(f"[detector] rule '{rule['name']}' failed: {e}", flush=True)
+
     try:
         detect_username_spray_by_ip()
     except Exception as e:
@@ -307,6 +354,7 @@ def evaluate():
         detect_distributed_ssh_bruteforce()
     except Exception as e:
         print(f"[detector] distributed bruteforce rule failed: {e}", flush=True)
+
 
 def wait_for_es():
     while True:
@@ -322,7 +370,7 @@ def wait_for_es():
 def main():
     print(f"[detector] booting — targets={BAN_TARGETS} "
           f"poll={POLL_INTERVAL_S}s lookback={LOOKBACK_S}s "
-          f"unban_after={UNBAN_AFTER_S}s", flush=True)
+          f"unban_after={UNBAN_AFTER_S}s (perma=disabled)", flush=True)
     wait_for_es()
 
     while True:
