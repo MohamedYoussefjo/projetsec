@@ -41,6 +41,8 @@ sed -i "s|data-sitekey=\".*\"|data-sitekey=\"$RECAPTCHA_SITE_KEY\"|" front-end/l
 
 sudo chmod -R 777 ./logs
 
+# B. Restreint les permissions
+sudo chmod 600 .env
 
 # === 7. Démarrage des conteneurs ===
 
